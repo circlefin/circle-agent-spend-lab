@@ -1,0 +1,41 @@
+{
+  "synthetic": true,
+  "chain": "BASE",
+  "payee": "0x1111111111111111111111111111111111111111",
+  "request": "How much USDC was transferred on the example network in September 2026? Show the source.",
+  "input": {
+    "asset": "USDC",
+    "period": "2026-09"
+  },
+  "scope": {
+    "request": "Who were the ten largest USDC holders at the end of September 2026?",
+    "operation": "wallet_balances",
+    "input": {}
+  },
+  "prices": {
+    "metrics": 0.02
+  },
+  "responses": {
+    "metrics": {
+      "synthetic": true,
+      "rows": [
+        {
+          "metric": "monthly_transfer_volume",
+          "value": 123456,
+          "unit": "USD",
+          "period": "2026-09",
+          "asset": "USDC",
+          "network": "example network"
+        }
+      ]
+    }
+  },
+  "replies": {
+    "scope": "Wallet-level holder data is not an approved operation for this seller, so nothing was bought.",
+    "unsupported": "This seller has monthly aggregates, not live market data such as the current peg. Nothing was bought."
+  },
+  "expectedInputPatterns": [
+    { "operation": "metrics", "field": "asset", "pattern": "^USDC$" },
+    { "operation": "metrics", "field": "period", "pattern": "^2026-09$" }
+  ]
+}

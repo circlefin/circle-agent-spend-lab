@@ -1,0 +1,31 @@
+{
+  "name": "circle-agent-spend-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "company": "bun src/company.ts",
+    "demo": "bun evals/demo.ts",
+    "agent": "bun src/main.ts",
+    "chat": "bun src/chat.ts --payment circle",
+    "web": "bun src/web.ts --payment circle",
+    "web:offline": "bun src/web.ts --offline",
+    "eval": "bun evals/run.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run typecheck && bun test"
+  },
+  "dependencies": {
+    "@langchain/core": "1.2.18",
+    "@langchain/langgraph": "1.5.1",
+    "@langchain/openai": "1.6.2",
+    "langchain": "1.5.18",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.17",
+    "typescript": "5.9.3"
+  },
+  "engines": { "bun": ">=1.2.17" }
+}

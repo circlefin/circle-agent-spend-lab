@@ -1,0 +1,13 @@
+{
+  "buyer": "ExampleCo finance and operations team",
+  "liveEnabled": false,
+  "limits": { "perRequestUsdc": 0.03, "sessionUsdc": 0.5, "approvalAboveUsdc": 0.004, "maxPurchases": 10 },
+  "services": {
+    "blockrun": {
+      "chain": "ARC", "payees": ["0x634D274e67DafaF76C54153aa113906a606e1E0B"],
+      "operations": { "chat_completion": { "maxUsdc": 0.01 } },
+      "scope": { "models": ["anthropic/claude-sonnet-5.5", "openai/gpt-6.1-sol", "google/gemini-2.5-flash"] }
+    },
+    "example": { "chain": "BASE", "payees": ["0x1111111111111111111111111111111111111111"], "operations": { "metrics": {} }, "scope": {} }
+  }
+}

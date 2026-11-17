@@ -1,0 +1,727 @@
+<!doctype html>
+<!--
+  Copyright 2026 Circle Internet Group, Inc.  All rights reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="page-token" content="__PAGE_TOKEN__">
+<title>Circle Agent Spend Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap">
+<style nonce="__NONCE__">
+/* Arc palette (arc.io): Protocol Navy, Validator Blue, Sky Sync, Static Ether, Blockstream Gold. Light theme only. */
+:root {
+  --navy: #1b3158; --blue: #2f578c; --sky: #acc6e9; --ether: #d5e0e7; --gold: #e9a13f;
+  --ink: var(--navy); --muted: #56688a; --faint: #647494; --card: #ffffff; --soft: #f3f7fb; --line: var(--ether);
+  --red: #b42318; --red-soft: #fdeeec;
+  --sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Space Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --shadow: 0 1px 2px rgba(27, 49, 88, 0.05), 0 8px 24px rgba(27, 49, 88, 0.06);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; color: var(--ink); font: 17px/1.55 var(--sans); display: flex; flex-direction: column;
+  background: #ffffff linear-gradient(180deg, #d7e6f6 0%, #e9f1fa 30%, #f7fafd 62%, #ffffff 100%) fixed; }
+button, textarea { font: inherit; color: inherit; }
+a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.mono { font-family: var(--mono); }
+/* Small bracketed labels: gold Space Mono on navy. */
+.tag { display: inline-block; font: 700 12px/1 var(--mono); letter-spacing: 0.06em; color: var(--gold); background: var(--navy); padding: 6px 9px; border-radius: 4px; white-space: nowrap; }
+
+/* Header */
+.top { display: flex; align-items: center; gap: 24px; padding: 18px 40px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.mark { width: 44px; height: 44px; border-radius: 12px; background: var(--navy); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 17px; letter-spacing: 0.02em; }
+.company { font-weight: 700; font-size: 20px; line-height: 1.2; }
+.tagline { color: var(--muted); font-size: 14px; }
+.who { margin: 0 0 0 auto; display: flex; gap: 28px; }
+.who div { display: flex; flex-direction: column; align-items: flex-end; }
+.who dt { font: 400 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); }
+.who dd { margin: 0; font-weight: 600; font-size: 16px; }
+
+/* Layout: the chat stays in the centre column, so a vertical crop keeps it whole. */
+.app { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.layout { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 760px) minmax(0, 1fr); gap: 32px; padding: 4px 40px 28px; }
+.chat { grid-column: 2; display: flex; flex-direction: column; min-height: 0; background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+.thread { flex: 1; overflow-y: auto; padding: 32px 36px 12px; scroll-behavior: smooth; }
+aside { grid-column: 3; max-width: 360px; display: flex; flex-direction: column; gap: 18px; min-height: 0; overflow-y: auto; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow); }
+.label { margin: 0 0 14px; font: 700 12px/1.4 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.records-card { flex: 1 0 220px; min-height: 220px; display: flex; flex-direction: column; }
+@media (max-width: 1360px) { .layout { grid-template-columns: minmax(0, 1fr) 340px; } .chat { grid-column: 1; } aside { grid-column: 2; } }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; padding: 4px 16px 20px; } aside { grid-column: 1; max-width: none; } .thread { max-height: 72vh; padding: 24px 20px 8px; } .top { padding: 16px; } .who { margin-left: 0; } }
+
+/* Welcome */
+.welcome { max-width: 620px; margin: 12px auto 28px; }
+.welcome h1 { font-size: 30px; line-height: 1.2; margin: 0 0 18px; letter-spacing: -0.01em; }
+.welcome ul { list-style: none; margin: 0 0 22px; padding: 0; }
+.welcome li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; margin: 0 0 14px; color: var(--muted); }
+.welcome li b { color: var(--ink); font-weight: 600; }
+.welcome .offline-note { margin: 0 0 16px; padding: 10px 14px; border-radius: 12px; background: var(--soft); border: 1px solid var(--ether); font-size: 15px; color: var(--muted); }
+.welcome .n { width: 28px; height: 28px; border-radius: 50%; background: var(--soft); border: 1px solid var(--sky); color: var(--blue); display: grid; place-items: center; font: 700 13px/1 var(--mono); }
+
+/* Turns */
+.turn { margin: 0 auto 36px; }
+.question { margin-left: auto; max-width: 86%; width: fit-content; background: var(--navy); color: #fff; padding: 14px 18px; border-radius: 18px 18px 4px 18px; white-space: pre-wrap; font-size: 18px; }
+.asker { text-align: right; font-size: 13px; color: var(--faint); margin: 8px 2px 18px; }
+.asker b { color: var(--muted); font-weight: 600; }
+.steps { list-style: none; margin: 0 0 14px; padding: 0; }
+.step { display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start; padding: 6px 0; font-size: 16px; }
+.icon { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; }
+.icon svg { width: 14px; height: 14px; }
+.step.ok .icon { background: #e6eef8; color: var(--blue); }
+.step.refused .icon { background: var(--red-soft); color: var(--red); }
+.step.warn .icon { background: #fbf1e1; color: #8a5a10; }
+.step.info .icon { background: var(--soft); color: var(--navy); border: 1px solid var(--ether); }
+.step.rehearsal .icon { background: var(--soft); color: var(--faint); border: 1px solid var(--ether); }
+.step .text { padding-top: 2px; }
+.step.refused .text > span:first-child { color: var(--red); font-weight: 600; }
+.step .sub { display: block; font-size: 14px; color: var(--muted); }
+.working { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 15px; padding: 6px 0; }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--ether); border-top-color: var(--blue); animation: spin 0.8s linear infinite; margin: 4px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Panels: provider picker, approval, refusal, answers */
+.panel { border-radius: 16px; padding: 20px 22px; margin: 10px 0 18px; border: 1px solid var(--line); background: var(--card); }
+.panel h3 { margin: 0 0 4px; font-size: 19px; }
+.panel .lead { margin: 0 0 16px; color: var(--muted); font-size: 15px; }
+.timer { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); margin-top: 16px; }
+.timer .bar { flex: 1; height: 4px; background: var(--ether); border-radius: 2px; overflow: hidden; }
+.timer .bar span { display: block; height: 100%; background: var(--blue); width: 100%; }
+.linkish { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: 14px; }
+.result { font-weight: 600; margin-top: 14px; }
+
+.picker { border: 1px solid var(--sky); background: linear-gradient(180deg, #f5f9fe 0%, #ffffff 100%); }
+.providers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 640px) { .providers { grid-template-columns: 1fr; } }
+.slot { display: flex; min-width: 0; }
+.provider { flex: 1; min-width: 0; overflow-wrap: anywhere; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; background: #fff; border: 1.5px solid var(--ether); border-radius: 14px; padding: 16px 16px 14px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, opacity 0.2s; }
+.provider:hover:not(:disabled) { border-color: var(--blue); box-shadow: 0 6px 18px rgba(47, 87, 140, 0.14); }
+.provider .who-sells { font: 400 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); }
+.provider .name { font-size: 21px; font-weight: 700; line-height: 1.2; }
+.provider .model { font-size: 15px; color: var(--muted); }
+.provider .price { font: 700 19px/1.3 var(--mono); color: var(--navy); margin: 6px 0 4px; }
+.provider .price small { font-size: 12px; font-weight: 400; color: var(--muted); }
+.provider .why { font-size: 13px; color: var(--red); }
+.provider:disabled { cursor: default; }
+.provider.unavailable { opacity: 0.55; }
+.provider.chosen { border: 2px solid var(--blue); box-shadow: 0 6px 18px rgba(47, 87, 140, 0.16); }
+.provider.faded { opacity: 0.4; }
+.provider .picked { font: 700 12px/1 var(--mono); color: var(--blue); letter-spacing: 0.08em; }
+
+.approval { border: 2px solid var(--blue); }
+.approval.decided-no { border-color: var(--ether); }
+.facts { display: grid; grid-template-columns: 96px 1fr; gap: 6px 14px; margin: 0 0 18px; }
+.facts dt { color: var(--muted); font-size: 14px; padding-top: 2px; }
+.facts dd { margin: 0; font-weight: 600; }
+.facts dd.price { font-family: var(--mono); }
+.facts dd.purpose { font-weight: 400; color: var(--muted); }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.btn { border: 1px solid transparent; border-radius: 12px; padding: 11px 20px; font-weight: 600; cursor: pointer; font-size: 16px; }
+.btn.primary { background: var(--blue); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: var(--navy); }
+.btn.secondary { background: #fff; border-color: var(--sky); color: var(--navy); }
+.btn:disabled { opacity: 0.55; cursor: default; }
+
+.refusal { border: 1px solid #f3c7c1; border-left: 4px solid var(--red); background: var(--red-soft); }
+.refusal h3 { color: var(--red); }
+.refusal p { margin: 0; font-size: 17px; }
+
+.bought { border: 1px solid var(--sky); }
+.bought .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.bought .head b { font-size: 18px; }
+.bought .head span.by { color: var(--muted); font-size: 14px; margin-left: 6px; }
+.bought .foot { display: flex; gap: 16px; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--ether); font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+.bought .foot .mono { color: var(--navy); }
+.reply { background: var(--soft); border: 1px solid var(--ether); border-radius: 4px 16px 16px 16px; padding: 14px 18px; }
+.reply .by { font: 700 11px/1.4 var(--mono); color: var(--faint); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.1em; }
+.md p { margin: 0 0 10px; }
+.md p:last-child { margin-bottom: 0; }
+.md ul, .md ol { margin: 4px 0 10px; padding-left: 22px; }
+.md li { margin: 3px 0; }
+.md table { border-collapse: collapse; margin: 6px 0 12px; font-size: 15px; }
+.md th, .md td { border: 1px solid var(--ether); padding: 5px 9px; text-align: left; }
+.md .code { font-family: var(--mono); font-size: 14px; }
+
+/* Composer */
+.composer { border-top: 1px solid var(--ether); padding: 16px 22px 20px; }
+.sellers { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.sellers .label { margin: 0 6px 0 0; }
+.chip { border: 1px solid var(--ether); background: var(--soft); border-radius: 999px; padding: 5px 14px; font-size: 14px; cursor: pointer; color: var(--navy); }
+.chip[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.chip:disabled { cursor: default; opacity: 0.6; }
+.presets { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; margin-bottom: 12px; }
+@media (max-width: 640px) { .presets { grid-auto-flow: row; } }
+.preset { display: flex; flex-direction: column; align-items: flex-start; text-align: left; border: 1px solid var(--sky); background: #fff; border-radius: 12px; padding: 8px 14px; cursor: pointer; }
+.preset:hover:not(:disabled) { border-color: var(--blue); }
+.preset b { font-size: 15px; font-weight: 600; }
+.preset small { font: 400 11px/1.5 var(--mono); color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.preset.expect-refusal small { color: var(--red); }
+.preset:disabled { opacity: 0.5; cursor: default; }
+form { display: flex; gap: 12px; align-items: flex-end; }
+textarea { flex: 1; resize: none; border: 1px solid var(--sky); border-radius: 12px; padding: 12px 14px; background: #fff; min-height: 52px; font-size: 16px; }
+textarea:focus { outline: 3px solid rgba(47, 87, 140, 0.15); border-color: var(--blue); }
+.banner { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; font-size: 15px; background: var(--red-soft); color: var(--red); }
+
+/* Budget */
+.meter { height: 12px; border-radius: 6px; background: var(--soft); border: 1px solid var(--ether); overflow: hidden; display: flex; }
+.meter span { height: 100%; transition: width 0.4s; width: 0; }
+.meter .spent { background: var(--blue); }
+.meter .reserved { background: var(--sky); }
+.legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.legend div { font-size: 13px; color: var(--muted); }
+.legend b { display: block; font: 700 17px/1.3 var(--mono); color: var(--navy); overflow-wrap: anywhere; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.dot.spent { background: var(--blue); } .dot.reserved { background: var(--sky); } .dot.left { background: var(--soft); border: 1px solid var(--ether); }
+.fine { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+
+/* Record */
+.records { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 120px; }
+.records .empty { color: var(--faint); font-size: 14px; }
+.row { padding: 12px 0; border-top: 1px solid var(--ether); font-size: 14px; }
+.row:first-child { border-top: 0; padding-top: 0; }
+.row .r1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+.row .time { font: 400 12px/1 var(--mono); color: var(--faint); }
+.row .what { font-size: 15px; }
+.row .meta, .row .purpose { color: var(--muted); }
+.row .purpose { font-style: italic; }
+.row .small { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.row .small.refused { color: var(--red); }
+.pill { font: 700 11px/1 var(--mono); padding: 5px 8px; border-radius: 4px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.pill.ok { background: #e6eef8; color: var(--blue); }
+.pill.refused { background: var(--red-soft); color: var(--red); }
+.pill.warn { background: #fbf1e1; color: #8a5a10; }
+.pill.rehearsal { background: var(--soft); color: var(--muted); border: 1px solid var(--ether); }
+.row .safr-tag { margin-top: 6px; }
+
+/* SAFR: the four runtime components, each lit as its check runs. Names and outcomes come from src/safr.ts. An exploration, not a certification. */
+.safr-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.safr-step { display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start; padding: 6px 10px; border-radius: 12px; border: 1px solid transparent; transition: background 0.2s, border-color 0.2s; }
+.safr-step .num { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 var(--mono); background: var(--soft); border: 1px solid var(--ether); color: var(--faint); }
+.safr-step .num svg { width: 13px; height: 13px; }
+.safr-step .name { font-weight: 600; font-size: 15px; line-height: 1.3; }
+.safr-step .note { display: block; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.safr-step.active { background: #f5f9fe; border-color: var(--sky); }
+.safr-step.active .num { background: var(--blue); border-color: var(--blue); color: #fff; }
+.safr-step.passed .num { background: #e6eef8; border-color: #e6eef8; color: var(--blue); }
+.safr-step.failed { background: var(--red-soft); border-color: #f3c7c1; }
+.safr-step.failed .num { background: var(--red); border-color: var(--red); color: #fff; }
+.safr-step.failed .note { color: var(--red); }
+.safr-foot { font-size: 12px; color: var(--faint); margin: 12px 0 0; }
+.safr-tag { display: block; margin-top: 3px; font: 700 11px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); }
+.step.refused .safr-tag, .refusal .safr-tag, .row .safr-tag.deny { color: var(--red); }
+.panel .safr-tag { margin: -8px 0 14px; }
+.refusal .safr-tag { margin: 10px 0 0; }
+/* Narrow screens: a compact four-step tracker above the chat replaces the side card. */
+.safr-tracker { display: none; list-style: none; margin: 0; }
+.safr-card[hidden], .safr-tracker[hidden] { display: none !important; }
+@media (max-width: 900px) {
+  .safr-card { display: none; }
+  .safr-tracker { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 12px 14px 0; }
+  .safr-tracker .safr-step { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 4px; padding: 6px 4px; }
+  .safr-tracker .name { font-size: 12px; }
+  .safr-tracker .note { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Stable data-testid hooks for an external recording tool. Keep them when changing the markup. -->
+<main class="app" data-testid="app">
+<header class="top">
+  <div class="brand">
+    <div class="mark" id="mark" aria-hidden="true">EC</div>
+    <div><div class="company" id="company">Company</div><div class="tagline">Research agent with a USDC budget on Arc</div></div>
+  </div>
+  <dl class="who">
+    <div><dt>Employee</dt><dd id="employee">...</dd></div>
+    <div><dt>Agent</dt><dd id="agent">...</dd></div>
+  </dl>
+</header>
+<div class="layout">
+  <section class="chat" aria-label="Chat">
+    <ol class="safr-tracker" id="safr-tracker" aria-hidden="true" data-testid="safr-tracker"></ol>
+    <div class="thread" id="thread" role="log" aria-live="polite"></div>
+    <div class="composer">
+      <div class="banner" id="banner" hidden></div>
+      <div class="presets" id="presets"></div>
+      <div class="sellers" id="sellers" role="group" aria-label="Seller" data-testid="seller-select"></div>
+      <form id="ask">
+        <textarea id="question" rows="2" placeholder="Ask the research agent" aria-label="Question" data-testid="ask-input"></textarea>
+        <button class="btn primary" type="submit" id="send" data-testid="ask-send">Ask</button>
+      </form>
+    </div>
+  </section>
+  <aside>
+    <section class="card safr-card" aria-label="SAFR runtime components" data-testid="safr-panel">
+      <h2 class="label">SAFR · four runtime components</h2>
+      <ol class="safr-steps" id="safr-steps"></ol>
+      <p class="safr-foot" id="safr-foot"></p>
+    </section>
+    <section class="card" data-testid="budget">
+      <h2 class="label">Chat budget</h2>
+      <div class="meter" role="img" id="meter" aria-label="Budget"><span class="spent" id="bar-spent"></span><span class="reserved" id="bar-reserved"></span></div>
+      <div class="legend">
+        <div><span class="dot spent"></span>Spent<b id="spent">0.00</b></div>
+        <div><span class="dot reserved"></span>Held<b id="reserved">0.00</b></div>
+        <div><span class="dot left"></span>Left<b id="left">0.00</b></div>
+      </div>
+      <p class="fine" id="budget-fine"></p>
+    </section>
+    <section class="card records-card">
+      <h2 class="label">Record · SAFR Audit Log</h2>
+      <ol class="records" id="records"><li class="empty">Every decision appears here: who asked, what the agent bought, the price and the outcome.</li></ol>
+    </section>
+  </aside>
+</div>
+</main>
+<script nonce="__NONCE__">
+(() => {
+  'use strict';
+  const token = document.querySelector('meta[name="page-token"]').content;
+  const $ = id => document.getElementById(id);
+  const thread = $('thread'), form = $('ask'), question = $('question'), send = $('send');
+  let config = null, busy = false, turn = null, seller = null;
+  const approvals = new Map(), choices = new Map();
+
+  const icons = {
+    ok: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+    refused: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
+    warn: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 3.5v6M8 12.5v.1"/></svg>',
+    info: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="2.6"/></svg>',
+    rehearsal: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3.5 8h9"/></svg>',
+  };
+  const explorerName = { ARC: 'Arc explorer', 'ARC-TESTNET': 'Arc explorer' };
+  // In quote-only mode nothing is paid, so no tag says paid.
+  // The offline demo (bun run web:offline) simulates every payment, so its tags never say paid either.
+  const pays = () => Boolean(config.live && !config.offline);
+  const paidTag = network => config.offline ? '[SIMULATED]' : pays() ? `[PAID ON ${String(network || '').toUpperCase()}]` : '[QUOTE ONLY]';
+  const approvalText = () => config.approvalReachable ? `Anything above ${usdc(config.approvalAboveUsdc)} USDC also waits for your approval.` : 'Each answer is capped by company policy.';
+
+  function h(tag, props, ...children) {
+    const el = document.createElement(tag);
+    for (const [key, value] of Object.entries(props || {})) {
+      if (value === null || value === undefined || value === false) continue;
+      if (key === 'class') el.className = value;
+      else if (key.startsWith('on')) el.addEventListener(key.slice(2), value);
+      else el.setAttribute(key, value === true ? '' : value);
+    }
+    for (const child of children.flat()) if (child !== null && child !== undefined && child !== false) el.append(child instanceof Node ? child : document.createTextNode(String(child)));
+    return el;
+  }
+  function icon(tone) { const span = h('span', { class: 'icon', 'aria-hidden': 'true' }); span.innerHTML = icons[tone] || icons.info; return span; }
+  const usdc = value => {
+    const text = Number(value || 0).toFixed(6).replace(/0+$/, '').replace(/\.$/, '');
+    const [whole, decimals = ''] = text.split('.');
+    return `${whole}.${decimals.padEnd(2, '0')}`;
+  };
+  const clock = iso => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const countdown = ms => { const seconds = Math.ceil(Math.max(0, ms) / 1000); return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`; };
+  const plain = text => String(text || '').replace(/^(Identity check failed|Refused by policy): /, '');
+  const lowerFirst = text => String(text || '').replace(/^./, c => c.toLowerCase());
+
+  async function api(path, body) {
+    return fetch(path, { method: body ? 'POST' : 'GET', headers: { 'x-page-token': token, ...(body ? { 'content-type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  }
+
+  // SAFR panel: one row per runtime component, reset at each turn and lit as its check runs.
+  // A server without SAFR terms (an older recording, say) shows no panel and no tags.
+  const safrRows = new Map();
+  const hasSafr = () => Boolean(config && config.safr);
+  function renderSafr() {
+    safrRows.clear();
+    for (const el of [document.querySelector('.safr-card'), $('safr-tracker')]) el.hidden = !hasSafr();
+    if (!hasSafr()) return;
+    const rows = withNotes => config.safr.components.map((component, index) => {
+      const num = h('span', { class: 'num', 'aria-hidden': 'true' }, String(index + 1));
+      const note = withNotes ? h('span', { class: 'note' }, component.question) : null;
+      const li = h('li', { class: 'safr-step', 'data-safr': component.id, ...(withNotes ? { 'data-testid': 'safr-step' } : {}) }, num, h('div', {}, h('div', { class: 'name' }, component.name), note));
+      const entry = safrRows.get(component.id) || { parts: [], n: String(index + 1), question: component.question };
+      entry.parts.push({ li, num, note }); safrRows.set(component.id, entry);
+      return li;
+    });
+    $('safr-steps').replaceChildren(...rows(true));
+    $('safr-tracker').replaceChildren(...rows(false));
+    $('safr-foot').replaceChildren('Each check follows a runtime component from ', h('a', { href: config.safr.source.url, target: '_blank', rel: 'noopener noreferrer' }, 'SAFR v1.1'), '. An exploration, not a certification.');
+  }
+  function safrMark(id, state, note) {
+    const entry = safrRows.get(id); if (!entry) return;
+    for (const part of entry.parts) {
+      part.li.className = `safr-step${state ? ` ${state}` : ''}`;
+      if (state === 'passed' || state === 'failed') part.num.innerHTML = icons[state === 'passed' ? 'ok' : 'refused'];
+      else part.num.textContent = entry.n;
+      if (part.note) part.note.textContent = note || entry.question;
+    }
+  }
+  function safrReset() { for (const id of safrRows.keys()) safrMark(id, null); }
+  const safrName = id => (hasSafr() && config.safr.components.find(component => component.id === id) || { name: id }).name;
+  const outcomeName = outcome => (hasSafr() && config.safr.outcomes[outcome]) || outcome;
+  const safrTag = (text, extra) => !hasSafr() ? null : h('span', { class: `safr-tag${extra ? ` ${extra}` : ''}`, 'data-testid': 'safr-tag' }, `SAFR · ${text}`);
+  // A refusal: the component whose check failed, then the Disposition Engine's Deny.
+  function safrDeny(safr, reason, before) {
+    if (safr.decidedBy !== 'disposition_engine') safrMark(safr.decidedBy, 'failed', reason);
+    safrMark('disposition_engine', 'failed', `${outcomeName('deny')}: refused before ${before}`);
+  }
+
+  // Header, sellers, presets, budget and records from the server.
+  function applyConfig(state) {
+    config = state;
+    renderSafr();
+    document.title = 'Circle Agent Spend Lab';
+    $('company').textContent = state.company;
+    $('mark').textContent = state.company.replace(/[^A-Z]/g, '').slice(0, 2) || state.company.slice(0, 2).toUpperCase();
+    $('employee').textContent = state.employee;
+    $('agent').textContent = state.agent;
+    if (!state.sellers.some(entry => entry.id === seller)) seller = state.sellers[0] ? state.sellers[0].id : null;
+    renderSellers();
+    $('presets').replaceChildren(...state.presets.map(preset => h('button', {
+      type: 'button', class: `preset${preset.kind === 'refusal' ? ' expect-refusal' : ''}`, 'data-preset': preset.id, 'data-testid': `preset-${preset.id}`,
+      title: preset.question, onclick: () => ask(preset.question, preset.seller, preset.actAs || 'employee'),
+    }, h('b', {}, preset.label), h('small', {}, preset.kind === 'refusal' ? preset.note : `${preset.note} on ${preset.network}`))));
+    renderBudget(state.budget);
+    $('records').replaceChildren();
+    if (!state.records.length) $('records').append(h('li', { class: 'empty' }, 'Every decision appears here: who asked, what the agent bought, the price and the outcome.'));
+    for (const row of state.records) addRecord(row);
+    if (!thread.children.length) renderWelcome();
+    setHalted(state.halted);
+    setBusy(Boolean(state.busy));
+    if (state.busy) waitUntilFree();
+  }
+  function renderSellers() {
+    $('sellers').replaceChildren(h('span', { class: 'label' }, 'Seller'), ...config.sellers.map(entry => h('button', {
+      type: 'button', class: 'chip', 'aria-pressed': String(entry.id === seller), 'data-seller': entry.id, 'data-testid': `seller-${entry.id}`, disabled: busy,
+      onclick: () => { seller = entry.id; renderSellers(); },
+    }, entry.name)));
+  }
+  function renderWelcome() {
+    const point = (n, strong, rest) => h('li', {}, h('span', { class: 'n' }, n), h('span', {}, h('b', {}, strong), ` ${rest}`));
+    thread.append(h('div', { class: 'welcome', id: 'welcome' },
+      h('h1', {}, 'Ask the research agent'),
+      h('ul', {},
+        point('1', 'Signed.', `${config.employee} and ${config.agent} sign every question, checked against the company registry.`),
+        point('2', 'Checked.', 'Every purchase is checked against company policy: approved sellers, price caps and the chat budget.'),
+        point('3', 'Your call.', `You choose which model provider answers. ${approvalText()}`)),
+      config.offline ? h('p', { class: 'offline-note', 'data-testid': 'offline-note' }, 'Offline demo: a scripted agent and a scripted BlockRun.AI. Prices are fixed, every question gets the same recorded answer, and nothing is paid. For the real model and seller, run ', h('span', { class: 'mono' }, 'bun run web'), '.') : null,
+      h('span', { class: 'tag' }, config.offline ? '[OFFLINE DEMO: NOTHING IS PAID]' : pays() ? '[PAID IN USDC ON ARC]' : '[QUOTE ONLY: NOTHING IS PAID]')));
+  }
+  function setHalted(text) {
+    const banner = $('banner');
+    banner.hidden = !text;
+    banner.textContent = text ? `Chat stopped: ${text.replace(/\.$/, '')}. Check the wallet, then restart the server.` : '';
+  }
+  function setBusy(value) {
+    busy = value;
+    const blocked = busy || Boolean(config && config.halted);
+    send.disabled = blocked; question.disabled = blocked;
+    for (const button of document.querySelectorAll('.preset, .chip')) button.disabled = blocked;
+  }
+  async function waitUntilFree() {
+    while (true) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      try {
+        const response = await api('/api/state');
+        if (!response.ok) return;
+        const state = await response.json();
+        if (!state.busy) { applyConfig(state); return; }
+      } catch { continue; } // The server did not answer this time; ask again.
+    }
+  }
+
+  // One turn in the thread.
+  function startTurn(event) {
+    const welcome = $('welcome'); if (welcome) welcome.remove();
+    const steps = h('ol', { class: 'steps' });
+    const working = h('div', { class: 'working' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), 'The agent is working');
+    const asker = h('div', { class: 'asker' }, 'Asked by ', h('b', {}, event.employee), event.actAs === 'observer' ? ' (not assigned to the agent)' : '', ' · ', h('b', {}, event.sellerName), ` on ${event.network}`);
+    const el = h('div', { class: 'turn' }, h('div', { class: 'question' }, event.question), asker, steps, working);
+    thread.append(el);
+    turn = { el, working };
+    safrReset(); safrMark('agent_identity', 'active');
+    scroll();
+  }
+  function place(node) { if (!turn) return; turn.el.insertBefore(node, turn.working); scroll(); }
+  function addStep(tone, text, sub, kind, safr) {
+    if (!turn) return;
+    const body = h('div', { class: 'text' }, h('span', kind === 'payment' ? { 'data-testid': 'payment-line' } : {}, text));
+    if (sub) body.append(sub instanceof Node ? sub : h('span', { class: 'sub' }, sub));
+    if (safr && hasSafr()) body.append(safrTag(safr));
+    // Cards break the list; start a fresh list after a card so steps stay in order.
+    let list = turn.working.previousElementSibling;
+    if (!list || !list.classList.contains('steps')) { list = h('ol', { class: 'steps' }); place(list); }
+    list.append(h('li', { class: `step ${tone}`, 'data-testid': 'check-line', 'data-kind': kind || 'notice' }, icon(tone), body));
+    scroll();
+  }
+  function addRefusal(title, text) { place(h('div', { class: 'panel refusal', role: 'alert', 'data-testid': 'refusal-card' }, h('h3', {}, title), h('p', {}, text), safrTag(`${safrName('disposition_engine')}: ${outcomeName('deny')}`))); }
+  function receiptLink(chain, url) {
+    return url ? h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, `View on ${explorerName[chain] || 'the block explorer'}`) : null;
+  }
+  function timer(expiresAt, timeoutSeconds, words) {
+    const bar = h('span'); const text = h('span');
+    const total = timeoutSeconds * 1000;
+    const tick = () => { const left = expiresAt - Date.now(); text.textContent = `${words} ${countdown(left)}`; bar.style.width = `${Math.max(0, left / total) * 100}%`; };
+    tick();
+    return { el: h('div', { class: 'timer' }, text, h('div', { class: 'bar' }, bar)), text, interval: setInterval(tick, 250) };
+  }
+
+  // Provider picker: live quotes from the seller, one click chooses.
+  function addPicker(event) {
+    const wait = timer(event.expiresAt, event.timeoutSeconds, 'Nothing is bought if no provider is chosen in');
+    const cards = new Map();
+    const pick = async value => {
+      for (const card of cards.values()) card.disabled = true;
+      cancel.disabled = true;
+      const response = await api('/api/choose', { choiceId: event.choiceId, value });
+      if (!response.ok) { const body = await response.json().catch(() => ({})); clearInterval(wait.interval); wait.text.textContent = body.error || 'That choice is no longer waiting.'; }
+    };
+    for (const option of event.options) {
+      const card = h('button', { type: 'button', class: `provider${option.available ? '' : ' unavailable'}`, disabled: !option.available, 'data-value': option.value, 'data-testid': 'provider-pick', 'aria-label': `${option.provider} ${option.label}${option.priceUsdc !== undefined ? `, ${usdc(option.priceUsdc)} USDC` : ''}` },
+        h('span', { class: 'who-sells' }, `Sold by ${event.sellerName}`),
+        h('span', { class: 'name' }, option.provider),
+        h('span', { class: 'model' }, option.label),
+        h('span', { class: 'price' }, option.priceUsdc !== undefined ? usdc(option.priceUsdc) : 'No price', ' ', h('small', {}, 'USDC')),
+        option.available ? h('span', { class: 'tag' }, paidTag(option.network)) : h('span', { class: 'why' }, option.reason || 'Not available'));
+      card.addEventListener('click', () => pick(option.value));
+      cards.set(option.value, card);
+    }
+    const cancel = h('button', { type: 'button', class: 'linkish', 'data-testid': 'provider-cancel' }, 'Cancel, buy nothing');
+    cancel.addEventListener('click', () => pick(null));
+    const footer = h('div', { class: 'actions' }, cancel);
+    const panel = h('div', { class: 'panel picker', role: 'group', 'aria-label': 'Choose a provider', 'data-testid': 'provider-picker' },
+      h('h3', {}, 'Choose who answers'),
+      h('p', { class: 'lead' }, config.offline ? `Scripted prices from ${event.sellerName} for this offline demo, nothing is paid.` : `Live prices for this question from ${event.sellerName}, ${pays() ? `paid in USDC on ${event.network}` : 'quote-only, nothing is paid'}.`),
+      h('div', { class: 'providers' }, [...cards].map(([value, card]) => h('div', { class: 'slot', 'data-testid': 'provider-card', 'data-model': value }, card))),
+      wait.el, footer);
+    choices.set(event.choiceId, { panel, cards, wait, footer });
+    place(panel);
+    const first = panel.querySelector('.provider:not(:disabled)'); if (first) first.focus({ preventScroll: true });
+  }
+  function closePicker(event) {
+    const entry = choices.get(event.choiceId);
+    if (!entry) return;
+    clearInterval(entry.wait.interval); entry.wait.el.remove();
+    for (const [value, card] of entry.cards) {
+      card.disabled = true;
+      if (value === event.value) { card.classList.add('chosen'); card.prepend(h('span', { class: 'picked' }, 'CHOSEN')); }
+      else card.classList.add('faded');
+    }
+    entry.footer.replaceChildren(h('span', { class: 'result' }, event.text));
+    choices.delete(event.choiceId);
+  }
+
+  function addApproval(event) {
+    const wait = timer(event.expiresAt, event.timeoutSeconds, 'Declines automatically in');
+    const approve = h('button', { class: 'btn primary', type: 'button', 'data-testid': 'approve' }, pays() ? `Approve and pay ${usdc(event.priceUsdc)} USDC` : `Approve ${usdc(event.priceUsdc)} USDC`);
+    const decline = h('button', { class: 'btn secondary', type: 'button', 'data-testid': 'decline' }, 'Decline');
+    const actions = h('div', { class: 'actions' }, approve, decline);
+    const card = h('div', { class: 'panel approval', role: 'group', 'aria-label': 'Approval needed', 'data-testid': 'approval-card' },
+      h('h3', {}, 'Approval needed'),
+      h('p', { class: 'lead' }, `The agent wants to buy ${event.what}.`),
+      safrTag(`${safrName('disposition_engine')}: ${outcomeName('escalate')}`),
+      h('dl', { class: 'facts' },
+        h('dt', {}, 'From'), h('dd', {}, event.sellerName),
+        h('dt', {}, 'Price'), h('dd', { class: 'price' }, `${usdc(event.priceUsdc)} USDC`),
+        h('dt', {}, 'Network'), h('dd', {}, event.network),
+        h('dt', {}, 'Purpose'), h('dd', { class: 'purpose' }, event.purpose)),
+      actions, wait.el);
+    const decide = async decision => {
+      approve.disabled = true; decline.disabled = true;
+      const response = await api('/api/approve', { approvalId: event.approvalId, decision });
+      if (!response.ok) { const body = await response.json().catch(() => ({})); clearInterval(wait.interval); wait.text.textContent = body.error || 'That approval is no longer waiting.'; }
+    };
+    approve.addEventListener('click', () => decide('approve'));
+    decline.addEventListener('click', () => decide('decline'));
+    approvals.set(event.approvalId, { card, actions, wait });
+    place(card);
+    approve.focus({ preventScroll: true });
+  }
+  function closeApproval(event) {
+    const entry = approvals.get(event.approvalId);
+    if (!entry) return;
+    clearInterval(entry.wait.interval); entry.wait.el.remove();
+    if (!event.approved) entry.card.classList.add('decided-no');
+    entry.actions.replaceChildren(h('span', { class: 'result' }, event.approved ? 'Approved on this screen' : event.text));
+    approvals.delete(event.approvalId);
+  }
+
+  // The answer a purchase bought, such as a model's reply, with its price and receipt.
+  function addBought(event) {
+    const body = h('div', { class: 'md' }); body.innerHTML = hideAddresses(markdown(event.answer.text));
+    place(h('div', { class: 'panel bought', 'data-testid': 'bought-answer' },
+      h('div', { class: 'head' }, h('div', {}, h('b', {}, event.answer.label), h('span', { class: 'by' }, event.answer.provider)), h('span', { class: 'tag' }, paidTag(event.network))),
+      body,
+      h('div', { class: 'foot' }, event.amountUsdc !== undefined ? h('span', { class: 'mono' }, `${usdc(event.amountUsdc)} USDC`) : null, receiptLink(event.chain, event.receiptUrl))));
+  }
+
+  function addRecord(row) {
+    const list = $('records');
+    const empty = list.querySelector('.empty'); if (empty) empty.remove();
+    const price = row.priceUsdc !== undefined ? `${usdc(row.priceUsdc)} USDC${row.network ? ` on ${row.network}` : ''}` : 'no price';
+    list.prepend(h('li', { class: 'row', 'data-testid': 'record-row' },
+      h('div', { class: 'r1' }, h('span', { class: 'time' }, clock(row.at)), h('span', { class: `pill ${row.tone}` }, row.pill)),
+      h('div', { class: 'what' }, h('b', {}, row.sellerName), `: ${row.what}`),
+      row.chosen ? h('div', { class: 'meta' }, row.chosen) : null,
+      h('div', { class: 'meta' }, `${row.employee} · ${price}`),
+      row.purpose ? h('div', { class: 'purpose' }, row.purpose) : null,
+      row.decided ? h('div', { class: 'small' }, row.decided) : null,
+      row.tone !== 'ok' ? h('div', { class: `small${row.tone === 'refused' ? ' refused' : ''}` }, row.outcomeText) : null,
+      row.receiptUrl ? h('div', { class: 'small' }, receiptLink(row.chain, row.receiptUrl)) : null,
+      row.safr ? safrTag(outcomeName(row.safr.outcome), row.safr.outcome === 'deny' ? 'deny' : '') : null));
+  }
+  function renderBudget(budget) {
+    const total = budget.sessionUsdc || 1;
+    $('bar-spent').style.width = `${Math.min(100, (budget.spentUsdc / total) * 100)}%`;
+    $('bar-reserved').style.width = `${Math.min(100, (budget.reservedUsdc / total) * 100)}%`;
+    $('spent').textContent = usdc(budget.spentUsdc);
+    $('reserved').textContent = usdc(budget.reservedUsdc);
+    $('left').textContent = usdc(budget.leftUsdc);
+    $('meter').setAttribute('aria-label', `Spent ${usdc(budget.spentUsdc)}, held ${usdc(budget.reservedUsdc)}, left ${usdc(budget.leftUsdc)} of ${usdc(budget.sessionUsdc)} USDC`);
+    $('budget-fine').textContent = `Out of ${usdc(budget.sessionUsdc)} USDC for this chat. ${budget.purchases} of ${budget.maxPurchases} purchases used. ${config && config.approvalReachable ? `Approval needed above ${usdc(config.approvalAboveUsdc)} USDC.` : 'Each answer is capped by company policy.'}`;
+  }
+
+  // A small, safe Markdown subset for answers: paragraphs, lists, tables, bold, code and https links.
+  function escapeHtml(text) { return text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+  function inline(text) {
+    return escapeHtml(text)
+      .replace(/\[([^\]]+)\]\((https:\/\/[^\s()`]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/(^|[\s(])(https:\/\/[^\s<()`]+)/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<span class="code">$1</span>');
+  }
+  // Wallet addresses, payee addresses and transaction hashes never show on this page. Tags are left alone.
+  function hideAddresses(html) {
+    return html.split(/(<[^>]+>)/).map(part => part.startsWith('<') ? part : part
+      .replace(/0x[0-9a-fA-F]{64}/g, '[transaction hidden]')
+      .replace(/0x[0-9a-fA-F]{40}(?![0-9a-fA-F])/g, '[address hidden]')).join('');
+  }
+  function markdown(text) {
+    const out = []; const lines = String(text || '').replace(/\r/g, '').split('\n');
+    for (let i = 0; i < lines.length;) {
+      const line = lines[i];
+      if (!line.trim()) { i++; continue; }
+      if (/^\s*\|/.test(line)) {
+        const rows = [];
+        while (i < lines.length && /^\s*\|/.test(lines[i])) { if (!/^\s*\|?\s*:?-{2,}/.test(lines[i])) rows.push(lines[i].trim().replace(/^\||\|$/g, '').split('|').map(cell => inline(cell.trim()))); i++; }
+        out.push(`<table>${rows.map((cells, r) => `<tr>${cells.map(cell => r === 0 ? `<th>${cell}</th>` : `<td>${cell}</td>`).join('')}</tr>`).join('')}</table>`);
+        continue;
+      }
+      if (/^\s*([-*]|\d+\.)\s+/.test(line)) {
+        const ordered = /^\s*\d+\./.test(line); const items = [];
+        while (i < lines.length && /^\s*([-*]|\d+\.)\s+/.test(lines[i])) { items.push(`<li>${inline(lines[i].replace(/^\s*([-*]|\d+\.)\s+/, ''))}</li>`); i++; }
+        out.push(`<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`);
+        continue;
+      }
+      const para = [];
+      while (i < lines.length && lines[i].trim() && !/^\s*(\||[-*]\s|\d+\.\s)/.test(lines[i])) { para.push(lines[i].replace(/^#{1,6}\s+(.*)$/, '**$1**')); i++; }
+      out.push(`<p>${para.map(inline).join('<br>')}</p>`);
+    }
+    return out.join('');
+  }
+
+  const handlers = {
+    turn: startTurn,
+    identity(event) {
+      if (event.ok) { addStep('ok', event.text, 'Signed request checked against the company registry', 'identity', safrName('agent_identity')); safrMark('agent_identity', 'passed', 'Signed and assigned in the company registry'); }
+      else {
+        addStep('refused', event.text, null, 'identity', safrName('agent_identity')); addRefusal('Refused by the identity check', plain(event.text));
+        safrDeny(event.safr || { decidedBy: 'agent_identity' }, plain(event.text), 'any model or payment');
+      }
+    },
+    proposal(event) { addStep('info', event.text, event.purpose ? `Purpose: ${event.purpose}` : null, 'proposal'); safrMark('controls_repository', 'active', 'Checking the request against the rules'); },
+    provider_choice_requested: addPicker,
+    provider_choice_result: closePicker,
+    policy(event) {
+      if (event.ok) { addStep('ok', event.text, null, 'policy', safrName('controls_repository')); safrMark('controls_repository', 'passed', 'Within the rules'); safrMark('disposition_engine', 'active'); }
+      else {
+        const safr = event.safr || { decidedBy: 'controls_repository' };
+        addStep('refused', event.text, null, 'policy', safrName(safr.decidedBy)); addRefusal('Refused by company policy', plain(event.text));
+        safrDeny(safr, plain(event.text), 'payment');
+      }
+    },
+    quote(event) { addStep('info', event.text, null, 'quote'); },
+    approval_requested(event) { addApproval(event); safrMark('disposition_engine', 'active', `${outcomeName('escalate')}: waiting for an approver`); },
+    approval_result(event) {
+      closeApproval(event);
+      const outcome = `${safrName('disposition_engine')}: ${outcomeName('escalate')}`;
+      // Approved: the payment line that follows carries the tag. Declined: this line is the outcome.
+      addStep(event.approved ? 'ok' : 'refused', event.approved ? 'Approved' : event.text, null, 'approval', event.approved ? null : outcome);
+      safrMark('disposition_engine', event.approved ? 'active' : 'failed', `${outcomeName('escalate')}: ${event.approved ? 'approved' : 'declined, nothing paid'}`);
+    },
+    payment(event) {
+      const outcome = event.safr ? outcomeName(event.safr.outcome) : null;
+      if (event.status !== 'not_chosen') addStep(event.tone, event.text, event.receiptUrl && !event.answer ? h('span', { class: 'sub' }, receiptLink(event.chain, event.receiptUrl)) : null, 'payment', outcome ? `${safrName('disposition_engine')}: ${outcome}` : null);
+      if (outcome && ['paid', 'simulated', 'quote_only'].includes(event.status)) safrMark('disposition_engine', 'passed', `${outcome}: ${event.status === 'quote_only' ? 'quote only, nothing paid' : lowerFirst(event.text)}`);
+      else if (outcome && event.status !== 'declined') safrMark('disposition_engine', 'failed', `${outcome}: ${lowerFirst(event.text)}`);
+      if (event.answer) addBought(event);
+    },
+    notice(event) { addStep(event.tone, event.text, null, 'notice'); },
+    record(event) { addRecord(event.row); if (turn) safrMark('audit_log', 'passed', event.row.safr ? `On the record: ${outcomeName(event.row.safr.outcome)}` : 'On the record'); },
+    answer(event) {
+      const body = h('div', { class: 'md' }); body.innerHTML = hideAddresses(markdown(event.text));
+      place(h('div', { class: 'reply', 'data-testid': 'answer' }, h('div', { class: 'by' }, 'Research agent'), body));
+    },
+    budget: renderBudget,
+    error(event) { addStep('warn', event.text, null, 'error'); if (/^Chat stopped/.test(event.text)) { config.halted = event.text.replace(/^Chat stopped: /, ''); setHalted(config.halted); } },
+    done() { if (turn) { turn.working.remove(); turn = null; } setBusy(false); question.focus(); },
+  };
+  function scroll() { thread.scrollTop = thread.scrollHeight; }
+
+  async function ask(text, chosenSeller, actAs) {
+    if (busy || !text.trim()) return;
+    if (chosenSeller) { seller = chosenSeller; renderSellers(); }
+    setBusy(true);
+    let response;
+    try { response = await api('/api/ask', { question: text.trim(), seller, actAs }); }
+    catch (error) { setBusy(false); alert(`Could not reach the local server: ${error.message}`); return; }
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      setBusy(false); alert(body.error || `The server answered ${response.status}`); return;
+    }
+    if (!chosenSeller) question.value = ''; // A preset click keeps a typed draft.
+    const reader = response.body.getReader(); const decoder = new TextDecoder(); let buffer = '';
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let index;
+        while ((index = buffer.indexOf('\n\n')) >= 0) {
+          const frame = buffer.slice(0, index); buffer = buffer.slice(index + 2);
+          const data = frame.split('\n').filter(line => line.startsWith('data: ')).map(line => line.slice(6)).join('\n');
+          if (!data) continue;
+          const event = JSON.parse(data);
+          (handlers[event.type] || (() => {}))(event);
+        }
+      }
+    } catch (error) { addStep('warn', `Lost the connection to the local server: ${error.message}`, null, 'error'); }
+    if (busy) handlers.done();
+  }
+
+  form.addEventListener('submit', event => { event.preventDefault(); ask(question.value, null, 'employee'); });
+  question.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); form.requestSubmit(); } });
+
+  api('/api/state').then(async response => {
+    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || `HTTP ${response.status}`);
+    applyConfig(await response.json());
+    question.focus();
+  }).catch(error => { thread.append(h('div', { class: 'welcome' }, h('h1', {}, 'Could not load the chat'), h('p', {}, error.message))); });
+})();
+</script>
+</body>
+</html>

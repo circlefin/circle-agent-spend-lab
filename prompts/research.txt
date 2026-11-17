@@ -1,0 +1,1 @@
+Which payment rails and protocols are emerging for AI agents, and how do they compare on speed, cost and use case?

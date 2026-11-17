@@ -1,0 +1,34 @@
+name: Check
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  offline:
+    # Skipped in crcl-main, which does not allow GitHub-hosted runners. The jobs below need this one, so they skip there too.
+    if: ${{ github.repository_owner != 'crcl-main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.17
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run demo
+      - run: bun run eval --service blockrun --offline
+      - run: bun run eval --service _template --offline
+      - run: bun run eval --service blockrun --models evals/models.example.json --dry-run
+
+  # Circle's shared security scan for pull requests on the public repository.
+  scan:
+    needs: offline
+    if: ${{ github.event_name == 'pull_request' && github.event.repository.private == false }}
+    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1
+
+  # Attaches the SBOM to releases on pushes to the default branch. The called workflow needs contents: write.
+  release-sbom:
+    needs: offline
+    if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    permissions:
+      contents: write
+    uses: circlefin/circle-public-github-workflows/.github/workflows/attach-release-assets.yaml@v1
