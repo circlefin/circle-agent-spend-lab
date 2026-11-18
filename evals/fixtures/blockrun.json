@@ -1,0 +1,55 @@
+{
+  "synthetic": true,
+  "note": "Scripted BlockRun.AI. Prices approximate live quotes; the answer text is one real model output. Nothing here calls the seller.",
+  "chain": "ARC",
+  "payee": "0x634D274e67DafaF76C54153aa113906a606e1E0B",
+  "request": "Which payment rails and protocols are emerging for AI agents, and how do they compare on speed, cost and use case?",
+  "input": {
+    "prompt": "Which payment rails and protocols are emerging for AI agents, and how do they compare on speed, cost and use case?",
+    "model": "google/gemini-2.5-flash"
+  },
+  "approvalInput": {
+    "prompt": "Which payment rails and protocols are emerging for AI agents, and how do they compare on speed, cost and use case?",
+    "model": "anthropic/claude-sonnet-5.5"
+  },
+  "scope": {
+    "request": "Use Claude Opus 5.5 to answer: which payment rails and protocols are emerging for AI agents?",
+    "operation": "chat_completion",
+    "input": {
+      "prompt": "Which payment rails and protocols are emerging for AI agents?",
+      "model": "anthropic/claude-opus-5.5"
+    }
+  },
+  "prices": {
+    "chat_completion": {
+      "anthropic/claude-sonnet-5.5": 0.00574,
+      "openai/gpt-6.1-sol": 0.00574,
+      "google/gemini-2.5-flash": 0.002111
+    }
+  },
+  "responses": {
+    "chat_completion": {
+      "object": "chat.completion",
+      "model": "google/gemini-2.5-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Emerging payment rails for AI agents include traditional financial networks and novel blockchain-based systems.\n\nTraditional rails leverage existing infrastructure for reliability and regulatory clarity, but can be slower and have higher transaction fees, suiting larger, less frequent payments. Blockchain systems offer faster, lower-cost, peer-to-peer transactions, ideal for micropayments and real-time settlements, but may have higher volatility and regulatory uncertainty."
+          },
+          "finish_reason": "stop"
+        }
+      ]
+    }
+  },
+  "replies": {
+    "answer": "The answer compares the two kinds of rail in general terms; it gives no figures for speed or cost.",
+    "scope": "The company has not approved Claude Opus 5.5 (anthropic/claude-opus-5.5), so code refused the purchase before any quote. Nothing was bought.",
+    "unsupported": "BlockRun.AI sells model answers, not live market data, so a model cannot say whether USDC is holding its peg right now. Nothing was bought."
+  },
+  "expectedInputPatterns": [
+    { "operation": "chat_completion", "field": "prompt", "pattern": "\\bpay" },
+    { "operation": "chat_completion", "field": "prompt", "pattern": "\\bagents?\\b" }
+  ]
+}

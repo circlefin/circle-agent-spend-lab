@@ -1,0 +1,6 @@
+[
+  { "name": "gpt-6.1-sol", "model": "gpt-6.1-sol", "apiMode": "responses", "apiKeyEnv": "OPENAI_API_KEY", "baseUrlEnv": "OPENAI_BASE_URL", "maxOutputTokens": 4096 },
+  { "name": "claude-sonnet-5-5", "model": "claude-sonnet-5-5", "apiMode": "chat_completions", "apiKeyEnv": "OPENAI_API_KEY", "baseUrlEnv": "OPENAI_BASE_URL", "maxOutputTokens": 4096 },
+  { "name": "gemini-4-argon", "model": "gemini-4-argon", "apiMode": "chat_completions", "apiKeyEnv": "OPENAI_API_KEY", "baseUrlEnv": "OPENAI_BASE_URL", "maxOutputTokens": 4096 },
+  { "name": "gpt-4.1-mini-baseline", "model": "gpt-4.1-mini", "apiMode": "chat_completions", "apiKeyEnv": "OPENAI_API_KEY", "baseUrlEnv": "OPENAI_BASE_URL", "maxOutputTokens": 4096 }
+]
